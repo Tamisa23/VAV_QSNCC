@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Data Display</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Real-time MQTT Data</h2>
+
+    <div id="tables-container"></div>
+
+    <script>
+        const socket = io("http://localhost:3000", {
+            transports: ["websocket", "polling"]
+        });
+
+        socket.on("connect", () => {
+            console.log("✅ WebSocket Connected!");
+        });
+
+        // ฟังก์ชันสำหรับอัปเดตตารางของแต่ละ Topic
+        function updateTable(topic, messages) {
+            let container = document.getElementById("tables-container");
+            let topicTable = document.getElementById(`table-${topic}`);
+
+            // ถ้าไม่มีตารางสำหรับ Topic นี้ ให้สร้างใหม่
+            if (!topicTable) {
+                let tableHtml = `
+                    <h3>Topic: ${topic}</h3>
+                    <table id="table-${topic}">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                `;
+                container.innerHTML += tableHtml;
+                topicTable = document.getElementById(`table-${topic}`);
+            }
+
+            let tableBody = topicTable.getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; // ล้างข้อมูลเก่า
+
+            messages.forEach(data => {
+                let row = `<tr>
+                    <td>${data.time}</td>
+                    <td>${data.message}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // รับข้อมูลจาก WebSocket และอัปเดตหน้าเว็บ
+        socket.on("mqttData", (messages) => {
+            console.log("📩 Received Data:", messages);
+            Object.keys(messages).forEach(topic => {
+                updateTable(topic, messages[topic]);
+            });
+        });
+
+        socket.on("connect_error", (error) => {
+            console.error("❌ WebSocket Connection Error:", error);
+        });
+    </script>
+</body>
+</html>
