@@ -18,7 +18,7 @@ const options = {
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
+const io = socketIo(server, { cors: { origin: "https://vav-qsncc.onrender.com", methods: ["GET", "POST"] } });
 const client = mqtt.connect(BROKER, options);
 
 let messages = {};
