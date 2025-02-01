@@ -7,7 +7,7 @@ const mqtt = require("mqtt");
 console.log("🔹 Username:", process.env.MQTT_USERNAME);
 console.log("🔹 Password:", process.env.MQTT_PASSWORD ? "********" : "Not Set");
 
-const BROKER = "mqtts://51c50770dd61458e8fb4690fa37fa5ce.s1.eu.hivemq.cloud:8883";
+const BROKER = "mqtts://2217876f209d4a73af014e541592ee16.s1.eu.hivemq.cloud:8883";
 const TOPICS = ["OA_Temp", "OA_Humidity", "Room1_Temp", "Room1_Humidity"]; // ✅ รองรับหลาย Topic
 
 const options = {
