@@ -1,18 +1,16 @@
 {
-  "name": "mqtt-plant",
+  "name": "mqtt-web-dashboard",
   "version": "1.0.0",
+  "description": "MQTT Web Dashboard with Node.js",
   "main": "plant.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node plant.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "mqtt": "^5.10.3",
-    "socket.io": "^4.8.1"
+    "express": "^4.18.2",
+    "http": "0.0.1-security",
+    "socket.io": "^4.7.2",
+    "mqtt": "^4.3.7",
+    "dotenv": "^16.0.3"
   }
 }
