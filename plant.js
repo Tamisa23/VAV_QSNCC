@@ -1,4 +1,4 @@
-require("dotenv").config(); // ✅ โหลดค่า .env
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -8,7 +8,12 @@ console.log("🔹 Username:", process.env.MQTT_USERNAME);
 console.log("🔹 Password:", process.env.MQTT_PASSWORD ? "********" : "Not Set");
 
 const BROKER = "mqtts://2217876f209d4a73af014e541592ee16.s1.eu.hivemq.cloud:8883";
-const TOPICS = ["OA_Temp", "OA_Humidity", "Room1_Temp", "Room1_Humidity"]; // ✅ รองรับหลาย Topic
+const TOPICS = [
+    "Ch1_kw", "Ch2_kw", "Ch3_kw",
+    "Chp1_kw", "Chp2_kw", "Chp3_kw",
+    "Cdp1_kw", "Cdp2_kw", "Cdp3_kw",
+    "Ct1_kw", "Ct2_kw", "Ct3_kw"
+];
 
 const options = {
     username: process.env.MQTT_USERNAME,
@@ -21,8 +26,10 @@ const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "https://vav-qsncc.onrender.com", methods: ["GET", "POST"] } });
 const client = mqtt.connect(BROKER, options);
 
-let messages = {};
+// 🔹 เก็บค่าล่าสุดของแต่ละ `Topic`
+let latestValues = {};
 
+// ✅ Subscribe ทุก Topic
 client.on("connect", () => {
     console.log("✅ Connected to HiveMQ Cloud");
     client.subscribe(TOPICS, (err) => {
@@ -30,16 +37,16 @@ client.on("connect", () => {
     });
 });
 
+// ✅ เมื่อได้รับค่าจาก MQTT
 client.on("message", (topic, message) => {
-    const msg = message.toString();
-    console.log(`📩 MQTT Received: ${topic} - ${msg}`);
+    const value = message.toString();
+    console.log(`📩 MQTT Received: ${topic} - ${value}`);
 
-    if (!messages[topic]) messages[topic] = [];
-    messages[topic].push({ time: new Date().toLocaleTimeString(), message: msg });
+    // 🔹 อัปเดตค่าล่าสุดของ `Topic` นั้น ๆ
+    latestValues[topic] = value;
 
-    if (messages[topic].length > 10) messages[topic].shift();
-
-    io.emit("mqttData", messages);
+    // 🔹 ส่งข้อมูลไปที่ WebSocket (ให้ทุก Client ได้ค่าล่าสุด)
+    io.emit("mqttData", latestValues);
 });
 
 app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));

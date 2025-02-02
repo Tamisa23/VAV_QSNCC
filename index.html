@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQTT Data Display</title>
+    <title>MQTT Data Dashboard</title>
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <style>
         table {
@@ -14,7 +14,7 @@
         th, td {
             border: 1px solid black;
             padding: 10px;
-            text-align: left;
+            text-align: center;
         }
         th {
             background-color: #f2f2f2;
@@ -22,9 +22,41 @@
     </style>
 </head>
 <body>
-    <h2>Real-time VAV Data</h2>
-
-    <div id="tables-container"></div>
+    <h2>MQTT Data</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Ch1 kW</th>
+                <th>Ch2 kW</th>
+                <th>Ch3 kW</th>
+                <th>Chp1 kW</th>
+                <th>Chp2 kW</th>
+                <th>Chp3 kW</th>
+                <th>Cdp1 kW</th>
+                <th>Cdp2 kW</th>
+                <th>Cdp3 kW</th>
+                <th>Ct1 kW</th>
+                <th>Ct2 kW</th>
+                <th>Ct3 kW</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="Ch1_kw">-</td>
+                <td id="Ch2_kw">-</td>
+                <td id="Ch3_kw">-</td>
+                <td id="Chp1_kw">-</td>
+                <td id="Chp2_kw">-</td>
+                <td id="Chp3_kw">-</td>
+                <td id="Cdp1_kw">-</td>
+                <td id="Cdp2_kw">-</td>
+                <td id="Cdp3_kw">-</td>
+                <td id="Ct1_kw">-</td>
+                <td id="Ct2_kw">-</td>
+                <td id="Ct3_kw">-</td>
+            </tr>
+        </tbody>
+    </table>
 
     <script>
         const socket = io("https://vav-qsncc.onrender.com", {
@@ -35,47 +67,15 @@
             console.log("✅ WebSocket Connected!");
         });
 
-        // ฟังก์ชันสำหรับอัปเดตตารางของแต่ละ Topic
-        function updateTable(topic, messages) {
-            let container = document.getElementById("tables-container");
-            let topicTable = document.getElementById(`table-${topic}`);
+        // ✅ รับข้อมูลจาก WebSocket และอัปเดตตาราง
+        socket.on("mqttData", (data) => {
+            console.log("📩 Received Data:", data);
 
-            // ถ้าไม่มีตารางสำหรับ Topic นี้ ให้สร้างใหม่
-            if (!topicTable) {
-                let tableHtml = `
-                    <h3>Topic: ${topic}</h3>
-                    <table id="table-${topic}">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Message</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                `;
-                container.innerHTML += tableHtml;
-                topicTable = document.getElementById(`table-${topic}`);
+            for (let key in data) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).innerText = data[key];
+                }
             }
-
-            let tableBody = topicTable.getElementsByTagName("tbody")[0];
-            tableBody.innerHTML = ""; // ล้างข้อมูลเก่า
-
-            messages.forEach(data => {
-                let row = `<tr>
-                    <td>${data.time}</td>
-                    <td>${data.message}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
-
-        // รับข้อมูลจาก WebSocket และอัปเดตหน้าเว็บ
-        socket.on("mqttData", (messages) => {
-            console.log("📩 Received Data:", messages);
-            Object.keys(messages).forEach(topic => {
-                updateTable(topic, messages[topic]);
-            });
         });
 
         socket.on("connect_error", (error) => {
