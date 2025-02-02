@@ -12,7 +12,7 @@ const TOPICS = [
     "Ch1_kw", "Ch2_kw", "Ch3_kw",
     "Chp1_kw", "Chp2_kw", "Chp3_kw",
     "Cdp1_kw", "Cdp2_kw", "Cdp3_kw",
-    "Ct1_kw", "Ct2_kw", "Ct3_kw"
+    "Ct1_kw", "Ct2_kw", "Ct3_kw" , "VSD_Speed"
 ];
 
 const options = {

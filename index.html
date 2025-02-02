@@ -40,7 +40,7 @@
                 <th>Ct3 kW</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody></tbody>
             <tr>
                 <td id="Ch1_kw">-</td>
                 <td id="Ch2_kw">-</td>
@@ -58,6 +58,21 @@
         </tbody>
     </table>
 
+    <h2>Speed of VSD</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>VSD Speed</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+            <tr>
+                <td id="VSD_Speed">-</td>
+            </tr>
+        </tbody>
+    </table>
+
+
     <script>
         const socket = io("https://vav-qsncc.onrender.com", {
             transports: ["websocket", "polling"]
@@ -70,6 +85,11 @@
         if (document.getElementById(id)) {
             let value = parseFloat(data[key]).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
             document.getElementById(id).innerText = value;
+
+            // ✅ ถ้า VSD_Speed เป็น 0 ให้แสดง Alarm
+            if (key === "VSD_Speed" && parseFloat(value) === 0) {
+                alert("🚨 Alarm! VSD Speed is 0! 🚨");
+            }
         } else {
             console.warn(`⚠️ No element found for ${key}`);
         }
