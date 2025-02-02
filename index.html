@@ -40,7 +40,7 @@
                 <th>Ct3 kW</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
             <tr>
                 <td id="Ch1_kw">-</td>
                 <td id="Ch2_kw">-</td>
@@ -65,44 +65,55 @@
                 <th>VSD Speed</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
             <tr>
                 <td id="VSD_Speed">-</td>
             </tr>
         </tbody>
     </table>
 
-   
 
     <script>
         const socket = io("https://vav-qsncc.onrender.com", {
             transports: ["websocket", "polling"]
         });
 
-        // ✅ ฟังก์ชันส่งค่า VSD Speed ไปยังเซิร์ฟเวอร์
-    
-
-        socket.on("mqttData", (data) => {
-    console.log("📩 Received Data:", data);
-    for (let key in data) {
-        let id = key.replace(/\./g, "_"); // ✅ แปลง "." เป็น "_" (ถ้ามี)
-        if (document.getElementById(id)) {
-            let value = parseFloat(data[key]).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
-            document.getElementById(id).innerText = value;
-
-            // ✅ ถ้า VSD_Speed เป็น 0 ให้แสดง Alarm
-            if (key === "VSD_Speed" && parseFloat(value) === 0) {
-                alert("🚨 Alarm! VSD Speed is 0! 🚨");
-            }
-        } else {
-            console.warn(`⚠️ No element found for ${key}`);
-        }
-    }
-});
+        // ✅ เช็คว่า WebSocket เชื่อมต่อสำเร็จหรือไม่
+        socket.on("connect", () => {
+            console.log("✅ WebSocket เชื่อมต่อสำเร็จ! Socket ID:", socket.id);
+        });
 
         socket.on("connect_error", (error) => {
-            console.error("❌ WebSocket Connection Error:", error);
+            console.error("❌ WebSocket เชื่อมต่อผิดพลาด:", error);
         });
+
+        // ✅ ตรวจสอบว่า WebSocket ได้รับข้อมูลจากเซิร์ฟเวอร์หรือไม่
+        socket.onAny((event, data) => {
+            console.log(`📡 Event: ${event}`, data);
+        });
+
+        // ✅ อัปเดตค่าใน HTML เมื่อได้รับ MQTT Data
+        socket.on("mqttData", (data) => {
+            console.log("📡 ข้อมูลที่ได้รับจาก WebSocket:", data);
+
+            Object.keys(data).forEach((key) => {
+                let id = key.replace(/\./g, "_"); // ✅ แปลงชื่อ Key ที่มี "." ให้เป็น "_"
+                let value = parseFloat(data[key]).toFixed(2);
+
+                let element = document.getElementById(id);
+                if (element) {
+                    element.innerText = value;
+                } else {
+                    console.warn(`⚠️ ไม่พบ Element ID สำหรับ ${key}`);
+                }
+
+                // 🚨 ถ้า VSD Speed = 0 ให้แจ้งเตือน
+                if (key === "VSD_Speed" && parseFloat(value) === 0) {
+                    alert("🚨 Alarm! VSD Speed is 0! 🚨");
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
