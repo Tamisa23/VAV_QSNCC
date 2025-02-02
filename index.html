@@ -72,11 +72,15 @@
         </tbody>
     </table>
 
+   
 
     <script>
         const socket = io("https://vav-qsncc.onrender.com", {
             transports: ["websocket", "polling"]
         });
+
+        // ✅ ฟังก์ชันส่งค่า VSD Speed ไปยังเซิร์ฟเวอร์
+    
 
         socket.on("mqttData", (data) => {
     console.log("📩 Received Data:", data);

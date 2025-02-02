@@ -31,8 +31,12 @@ let latestValues = {};
 
 // ✅ Subscribe ทุก Topic
 client.on("message", (topic, message) => {
+    console.log(`📩 MQTT Received (RAW): ${topic} - ${message.toString()}`);
     let value = parseFloat(message.toString()).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
     console.log(`📩 MQTT Received: ${topic} - ${value}`);
+     if (topic === "VSD_Speed") {
+        console.log(`🚀 VSD Speed Updated: ${message.toString()}`);
+    }
 
     // 🔹 อัปเดตค่าล่าสุดของ `Topic`
     latestValues[topic] = value;
@@ -42,13 +46,13 @@ client.on("message", (topic, message) => {
 });
 
 client.on("connect", () => {
-    console.log("✅ Connected to HiveMQ Cloud");
-
-    client.subscribe(TOPICS, (err) => {
-        if (!err) {
-            console.log(`📡 Subscribed to topics: ${TOPICS.join(", ")}`);
+    console.log("✅ MQTT Connected");
+    
+    client.subscribe("VSD_Speed", (err) => {
+        if (err) {
+            console.error("❌ Subscribe Error:", err);
         } else {
-            console.error("❌ MQTT Subscribe Failed:", err);
+            console.log("✅ Subscribed to VSD_Speed");
         }
     });
 });
@@ -59,3 +63,13 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
 client.on("error", (error) => console.error("❌ Connection Error:", error));
+
+io.on("connection", (socket) => {
+    console.log("🔌 New WebSocket Connection");
+
+    // ✅ รับค่าจาก WebSocket และส่งไปยัง MQTT
+    socket.on("setVsdSpeed", (speed) => {
+        console.log(`⚡ Received VSD Speed from WebSocket: ${speed}`); // ✅ Debug
+        client.publish("VSD_Speed", speed.toString(), { qos: 1, retain: true });
+    });
+});
