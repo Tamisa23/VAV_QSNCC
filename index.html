@@ -66,9 +66,12 @@
         socket.on("mqttData", (data) => {
     console.log("📩 Received Data:", data);
     for (let key in data) {
-        if (document.getElementById(key)) {
+        let id = key.replace(/\./g, "_"); // ✅ แปลง "." เป็น "_" (ถ้ามี)
+        if (document.getElementById(id)) {
             let value = parseFloat(data[key]).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
-            document.getElementById(key).innerText = value;
+            document.getElementById(id).innerText = value;
+        } else {
+            console.warn(`⚠️ No element found for ${key}`);
         }
     }
 });

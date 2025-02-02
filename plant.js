@@ -31,22 +31,26 @@ let latestValues = {};
 
 // ✅ Subscribe ทุก Topic
 client.on("message", (topic, message) => {
-    let value = parseFloat(message.toString()).toFixed(2); // ✅ แปลงเป็นทศนิยม 2 ตำแหน่ง
-    console.log(`📩 MQTT Received: ${topic} - ${value}`);
-    latestValues[topic] = value;
-    io.emit("mqttData", latestValues);
-});
-
-// ✅ เมื่อได้รับค่าจาก MQTT
-client.on("message", (topic, message) => {
-    const value = message.toString();
+    let value = parseFloat(message.toString()).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
     console.log(`📩 MQTT Received: ${topic} - ${value}`);
 
-    // 🔹 อัปเดตค่าล่าสุดของ `Topic` นั้น ๆ
+    // 🔹 อัปเดตค่าล่าสุดของ `Topic`
     latestValues[topic] = value;
 
     // 🔹 ส่งข้อมูลไปที่ WebSocket (ให้ทุก Client ได้ค่าล่าสุด)
     io.emit("mqttData", latestValues);
+});
+
+client.on("connect", () => {
+    console.log("✅ Connected to HiveMQ Cloud");
+
+    client.subscribe(TOPICS, (err) => {
+        if (!err) {
+            console.log(`📡 Subscribed to topics: ${TOPICS.join(", ")}`);
+        } else {
+            console.error("❌ MQTT Subscribe Failed:", err);
+        }
+    });
 });
 
 app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
