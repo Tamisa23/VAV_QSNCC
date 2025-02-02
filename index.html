@@ -63,20 +63,15 @@
             transports: ["websocket", "polling"]
         });
 
-        socket.on("connect", () => {
-            console.log("✅ WebSocket Connected!");
-        });
-
-        // ✅ รับข้อมูลจาก WebSocket และอัปเดตตาราง
         socket.on("mqttData", (data) => {
-            console.log("📩 Received Data:", data);
-
-            for (let key in data) {
-                if (document.getElementById(key)) {
-                    document.getElementById(key).innerText = data[key];
-                }
-            }
-        });
+    console.log("📩 Received Data:", data);
+    for (let key in data) {
+        if (document.getElementById(key)) {
+            let value = parseFloat(data[key]).toFixed(2); // ✅ ทำให้เป็นทศนิยม 2 ตำแหน่ง
+            document.getElementById(key).innerText = value;
+        }
+    }
+});
 
         socket.on("connect_error", (error) => {
             console.error("❌ WebSocket Connection Error:", error);

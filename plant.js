@@ -30,11 +30,11 @@ const client = mqtt.connect(BROKER, options);
 let latestValues = {};
 
 // ✅ Subscribe ทุก Topic
-client.on("connect", () => {
-    console.log("✅ Connected to HiveMQ Cloud");
-    client.subscribe(TOPICS, (err) => {
-        if (!err) console.log(`📡 Subscribed to topics: ${TOPICS.join(", ")}`);
-    });
+client.on("message", (topic, message) => {
+    let value = parseFloat(message.toString()).toFixed(2); // ✅ แปลงเป็นทศนิยม 2 ตำแหน่ง
+    console.log(`📩 MQTT Received: ${topic} - ${value}`);
+    latestValues[topic] = value;
+    io.emit("mqttData", latestValues);
 });
 
 // ✅ เมื่อได้รับค่าจาก MQTT
