@@ -19,9 +19,33 @@
         th {
             background-color: #f2f2f2;
         }
+
+         /* ✅ Alarm Message Style */
+         #alarmBox {
+            display: none;
+            background-color: rgb(240, 163, 163);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* ✅ Effect: Blinking (ใช้กับ JavaScript) */
+        .blinking {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+      
+    
     <h2>MQTT Data</h2>
     <table>
         <thead>
@@ -71,7 +95,9 @@
             </tr>
         </tbody>
     </table>
-
+    <footer> <!-- ✅ Alarm Message -->
+        <h3> <div id="alarmBox">🚨 Alarm! VSD Speed is 0! 🚨</div> </h3>
+         </footer>
 
     <script>
         const socket = io("https://vav-qsncc.onrender.com", {
@@ -107,13 +133,18 @@
                     console.warn(`⚠️ ไม่พบ Element ID สำหรับ ${key}`);
                 }
 
-                // 🚨 ถ้า VSD Speed = 0 ให้แจ้งเตือน
-                if (key === "VSD_Speed" && parseFloat(value) === 0) {
-                    alert("🚨 Alarm! VSD Speed is 0! 🚨");
+        if (key === "VSD_Speed") {
+                    let alarmBox = document.getElementById("alarmBox");
+                    if (parseFloat(value) === 0) {
+                        alarmBox.style.display = "block";  // 🚨 แสดง Alarm
+                        alarmBox.classList.add("blinking"); // ✅ เพิ่ม effect กระพริบ
+                    } else {
+                        alarmBox.style.display = "none";   // ✅ ซ่อน Alarm
+                        alarmBox.classList.remove("blinking"); // ✅ หยุด effect กระพริบ
+                    }
                 }
             });
         });
-
     </script>
 </body>
 </html>
